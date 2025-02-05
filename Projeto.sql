@@ -1,7 +1,4 @@
-/*Tudo que foi visto*/
-
-
-
+/*Tudo que foi trabalhado*/
 /*Filtramos as hospedagens mais bem avaliadas, ou seja, que tiveram como nota 4 ou 5.*/
 SELECT * FROM avaliacoes
 WHERE nota >=4;
