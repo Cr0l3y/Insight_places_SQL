@@ -606,6 +606,64 @@ SELECT * FROM temp_nome; -- e olhar o modelo da tabela
 
 
 
+-- Adicionando um CURSOR que permitir uma interatividade linha a linha através de uma determinada ordem.
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `looping_cursor_54`()
+BEGIN
+	DECLARE fimCursor INTEGER DEFAULT 0;
+    DECLARE vnome VARCHAR(255);
+    DECLARE cursor1 CURSOR FOR SELECT nome FROM temp_nome;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET fimCursor =1;
+    OPEN cursor1;
+	FETCH cursor1 INTO vnome;
+    WHILE fimCursor = 0 DO
+        SELECT vnome;
+		FETCH cursor1 INTO vnome;
+	END WHILE;
+    CLOSE cursor1;
+END
+
+DROP TEMPORARY TABLE IF EXISTS temp_nome;
+CREATE TEMPORARY TABLE temp_nome (nome VARCHAR(255));
+CALL inclui_usuarios_lista_52('João, Pedro, Maria, Lucia, Joana, Beatriz');
+SELECT * FROM temp_nome;
+CALL looping_cursor_54();
+
+-- adicionando múltiplos aluguéis
+
+USE `inc_places`;
+DROP PROCEDURE IF EXISTS `inc_places`.`novosAlugueis_55`;
+;
+DELIMITER $$
+USE `inc_places`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `novosAlugueis_55`(lista VARCHAR(255), vHospedagem VARCHAR(10), vDataInicio DATE, vDias INTEGER, vPrecoUnitario DECIMAL(10,2))
+BEGIN
+    DECLARE vClienteNome VARCHAR(150);
+    DECLARE fimCursor INTEGER DEFAULT 0;
+    DECLARE vnome VARCHAR(255);
+    DECLARE cursor1 CURSOR FOR SELECT nome FROM temp_nome;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET fimCursor = 1;
+    DROP TEMPORARY TABLE IF EXISTS temp_nome;
+    CREATE TEMPORARY TABLE temp_nome (nome VARCHAR(255));
+    CALL inclui_usuarios_lista_52(lista);
+    OPEN cursor1;
+    FETCH cursor1 INTO vnome;
+    WHILE fimCursor = 0 DO
+        SET vClienteNome = vnome;
+        CALL novoAluguel_44 (vClienteNome, vHospedagem, vDataInicio, vDias, vPrecoUnitario);
+        FETCH cursor1 INTO vnome;
+    END WHILE;
+    CLOSE cursor1;
+    DROP TEMPORARY TABLE IF EXISTS temp_nome;
+END$$
+
+DELIMITER ;
+;
+
+CALL novosAlugueis_55('Gabriel Carvalho,Erick Oliveira,Catarina Correia,Lorena Jesus', '8635', '2023-06-03', 7, 45);
+
+SELECT * FROM reservas WHERE reserva_id IN ('10017', '10016', '10015', '10014');
+
 
 
 
